@@ -154,9 +154,9 @@ function nextPage() {
 
 function sortSetsByDateAscending() {
   ParsedList.sort((a, b) => a.releaseDate - b.releaseDate);
-  showCards(currentPageNumber, 10); // Call showCards to display the sorted sets
+  showCards(currentPageNumber, 10); 
 }
 function sortSetsByDateDescending() {
   ParsedList.sort((a, b) => b.releaseDate - a.releaseDate);
-  showCards(currentPageNumber, 10); // Call showCards to display the sorted sets
+  showCards(currentPageNumber, 10); 
 }
