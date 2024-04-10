@@ -1,94 +1,160 @@
-/**
- * Data Catalog Project Starter Code - SEA Stage 2
- *
- * This file is where you should be doing most of your work. You should
- * also make changes to the HTML and CSS files, but we want you to prioritize
- * demonstrating your understanding of data structures, and you'll do that
- * with the JavaScript code you write in this file.
- * 
- * The comments in this file are only to help you learn how the starter code
- * works. The instructions for the project are in the README. That said, here
- * are the three things you should do first to learn about the starter code:
- * - 1 - Change something small in index.html or style.css, then reload your 
- *    browser and make sure you can see that change. 
- * - 2 - On your browser, right click anywhere on the page and select
- *    "Inspect" to open the browser developer tools. Then, go to the "console"
- *    tab in the new window that opened up. This console is where you will see
- *    JavaScript errors and logs, which is extremely helpful for debugging.
- *    (These instructions assume you're using Chrome, opening developer tools
- *    may be different on other browsers. We suggest using Chrome.)
- * - 3 - Add another string to the titles array a few lines down. Reload your
- *    browser and observe what happens. You should see a fourth "card" appear
- *    with the string you added to the array, but a broken image.
- * 
- */
+let page = 4;
+function parseCSVData(csvData) {
+
+    const dataList =[];
+    const lines = csvData.trim().split('\n');
+  
+    lines.forEach(line => {
+
+      const fields = line.split(',');
+  
+      const setNumber = fields[0].trim();
+      const setName = fields[1].trim();
+      const releaseDate = parseInt(fields[2].trim()); 
+      const themeId = parseInt(fields[3].trim()); 
+      const numberOfPieces = parseInt(fields[4].trim()); 
+      const imageUrl = fields[5].trim();
+      console.log(imageUrl);
+      const entry = {
+        setNumber: setNumber,
+        setName: setName,
+        releaseDate: releaseDate,
+        themeId: themeId,
+        numberOfPieces: numberOfPieces,
+        imageUrl: imageUrl
+      };
+  
+      dataList.push(entry);
+    });
+
+    console.log(dataList)
+  
+    return dataList;
+  }
+
+    const parseCategoriesCSV = (csvData) => {
+      const themes = {};
+      const lines = csvData.trim().split('\n');
+
+      lines.forEach(line => {
+        const fields = line.split(',');
+        const themeId = parseInt(fields[0].trim());
+        const themeName = fields[1].trim();
+
+        themes[themeId] = themeName;
+      });
+      return themes;
+      
+    };
 
 
-const FRESH_PRINCE_URL = "https://upload.wikimedia.org/wikipedia/en/3/33/Fresh_Prince_S1_DVD.jpg";
-const CURB_POSTER_URL = "https://m.media-amazon.com/images/M/MV5BZDY1ZGM4OGItMWMyNS00MDAyLWE2Y2MtZTFhMTU0MGI5ZDFlXkEyXkFqcGdeQXVyMDc5ODIzMw@@._V1_FMjpg_UX1000_.jpg";
-const EAST_LOS_HIGH_POSTER_URL = "https://static.wikia.nocookie.net/hulu/images/6/64/East_Los_High.jpg";
+    function getSets() {
+      fetch('./sets.csv')
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('ERROR FETCHING SETS CSV');
+              }
+              return response.text();
+          })
+          .then(setsCsvData => {
+              ParsedList = parseCSVData(setsCsvData);
+              
+              fetch('./themes.csv')
+                  .then(response => {
+                      if (!response.ok) {
+                          throw new Error('ERROR FETCHING THEMES CSV');
+                      }
+                      return response.text();
+                  })
+                  .then(categoriesCsvData => {
+                      CategoriesList = parseCategoriesCSV(categoriesCsvData);
+                      // Call showCards here after data is fetched and processed
+                      showCards(1, 5);
+                  })
+                  .catch(error => {
+                      console.error('ERROR FETCHING THEMES CSV', error);
+                  });
+          })
+          .catch(error => {
+              console.error('ERROR FETCHING SETS CSV', error);
+          });
+  }
 
-// This is an array of strings (TV show titles)
-let titles = [
-    "Fresh Prince of Bel Air",
-    "Curb Your Enthusiasm",
-    "East Los High"
-];
-// Your final submission should have much more data than this, and 
-// you should use more than just an array of strings to store it all.
 
+document.addEventListener("DOMContentLoaded", getSets); 
 
-// This function adds cards the page to display the data in the array
-function showCards() {
+let currentPageNumber = 1; // Track the current page number globally
+
+function showCards(pageNumber, pageSize) {
     const cardContainer = document.getElementById("card-container");
     cardContainer.innerHTML = "";
     const templateCard = document.querySelector(".card");
-    
-    for (let i = 0; i < titles.length; i++) {
-        let title = titles[i];
 
-        // This part of the code doesn't scale very well! After you add your
-        // own data, you'll need to do something totally different here.
-        let imageURL = "";
-        if (i == 0) {
-            imageURL = FRESH_PRINCE_URL;
-        } else if (i == 1) {
-            imageURL = CURB_POSTER_URL;
-        } else if (i == 2) {
-            imageURL = EAST_LOS_HIGH_POSTER_URL;
-        }
+    const startIndex = (pageNumber - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
 
-        const nextCard = templateCard.cloneNode(true); // Copy the template card
-        editCardContent(nextCard, title, imageURL); // Edit title and image
-        cardContainer.appendChild(nextCard); // Add new card to the container
-    }
+    const setsToShow = ParsedList.slice(startIndex, endIndex);
+
+    setsToShow.forEach((set, index) => {
+        const nextCard = templateCard.cloneNode(true);
+
+        editCardContent(nextCard, set.setName,
+            set.imageUrl, set.setNumber, set.releaseDate,
+            set.numberOfPieces, CategoriesList[set.themeId]);
+
+        cardContainer.appendChild(nextCard);
+    });
+
+    currentPageNumber = pageNumber; 
 }
 
-function editCardContent(card, newTitle, newImageURL) {
+
+function editCardContent(card, newSet, newImageURL, newSetNumber, newReleaseDate, newNumberPieces, newSetTheme) {
     card.style.display = "block";
 
     const cardHeader = card.querySelector("h2");
-    cardHeader.textContent = newTitle;
+    cardHeader.textContent = newSet;
 
     const cardImage = card.querySelector("img");
     cardImage.src = newImageURL;
-    cardImage.alt = newTitle + " Poster";
+    cardImage.alt = newSet + " Poster";
 
-    // You can use console.log to help you debug!
-    // View the output by right clicking on your website,
-    // select "Inspect", then click on the "Console" tab
-    console.log("new card:", newTitle, "- html: ", card);
+    const setNumberListItem = card.querySelector('.setNumber');
+    setNumberListItem.innerHTML = "<b>Set Number:</b> " + newSetNumber;
+
+    const releaseDateListItem = card.querySelector('.cardRelease');
+    releaseDateListItem.innerHTML = "<b>Release date: </b>" + newReleaseDate;
+
+    const numberPiecesListItem = card.querySelector('.numberPieces');
+    numberPiecesListItem.innerHTML = "<b>Piece Count: </b>"+newNumberPieces;
+
+    const setTheme = card.querySelector('.setTheme');
+    setTheme.innerHTML = "<b>Set Theme: </b>"+newSetTheme;
+
+    console.log("new card:", newSet, "- html: ", card);
 }
 
-// This calls the addCards() function when the page is first loaded
-document.addEventListener("DOMContentLoaded", showCards);
+
+// document.addEventListener("DOMContentLoaded", function() {
+//   showCards(1, 4);
+// });
+document.addEventListener("DOMContentLoaded", function() {
+  getSets(); // Call getSets function to fetch data
+});
 
 function quoteAlert() {
     console.log("Button Clicked!")
     alert("I guess I can kiss heaven goodbye, because it got to be a sin to look this good!");
 }
 
-function removeLastCard() {
-    titles.pop(); // Remove last item in titles array
-    showCards(); // Call showCards again to refresh
+function prevPage() {
+  const nextPageNumber = currentPageNumber - 5;
+  if(nextPageNumber>= 0){
+    showCards(nextPageNumber, 5);
+  }
+}
+
+function nextPage() {
+  const nextPageNumber = currentPageNumber + 5;
+  showCards(nextPageNumber, 5);
 }
