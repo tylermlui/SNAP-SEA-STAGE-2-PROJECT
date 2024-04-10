@@ -1,4 +1,3 @@
-let page = 4;
 function parseCSVData(csvData) {
 
     const dataList =[];
@@ -14,7 +13,6 @@ function parseCSVData(csvData) {
       const themeId = parseInt(fields[3].trim()); 
       const numberOfPieces = parseInt(fields[4].trim()); 
       const imageUrl = fields[5].trim();
-      console.log(imageUrl);
       const entry = {
         setNumber: setNumber,
         setName: setName,
@@ -28,7 +26,6 @@ function parseCSVData(csvData) {
     });
 
     console.log(dataList)
-  
     return dataList;
   }
 
@@ -58,7 +55,7 @@ function parseCSVData(csvData) {
           })
           .then(setsCsvData => {
               ParsedList = parseCSVData(setsCsvData);
-              
+              console.log(ParsedList)
               fetch('./themes.csv')
                   .then(response => {
                       if (!response.ok) {
@@ -68,8 +65,7 @@ function parseCSVData(csvData) {
                   })
                   .then(categoriesCsvData => {
                       CategoriesList = parseCategoriesCSV(categoriesCsvData);
-                      // Call showCards here after data is fetched and processed
-                      showCards(1, 5);
+                      showCards(1, 10);
                   })
                   .catch(error => {
                       console.error('ERROR FETCHING THEMES CSV', error);
@@ -83,31 +79,30 @@ function parseCSVData(csvData) {
 
 document.addEventListener("DOMContentLoaded", getSets); 
 
-let currentPageNumber = 1; // Track the current page number globally
+let currentPageNumber = 1; 
 
 function showCards(pageNumber, pageSize) {
-    const cardContainer = document.getElementById("card-container");
-    cardContainer.innerHTML = "";
-    const templateCard = document.querySelector(".card");
+  const cardContainer = document.getElementById("card-container");
+  cardContainer.innerHTML = "";
+  const templateCard = document.querySelector(".card");
 
-    const startIndex = (pageNumber - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
 
-    const setsToShow = ParsedList.slice(startIndex, endIndex);
+  const setsToShow = ParsedList.slice(startIndex, endIndex);
 
-    setsToShow.forEach((set, index) => {
-        const nextCard = templateCard.cloneNode(true);
+  setsToShow.forEach((set) => {
+      const nextCard = templateCard.cloneNode(true);
 
-        editCardContent(nextCard, set.setName,
-            set.imageUrl, set.setNumber, set.releaseDate,
-            set.numberOfPieces, CategoriesList[set.themeId]);
+      editCardContent(nextCard, set.setName,
+          set.imageUrl, set.setNumber, set.releaseDate,
+          set.numberOfPieces, CategoriesList[set.themeId]);
 
-        cardContainer.appendChild(nextCard);
-    });
+      cardContainer.appendChild(nextCard);
+  });
 
-    currentPageNumber = pageNumber; 
+  currentPageNumber = pageNumber; 
 }
-
 
 function editCardContent(card, newSet, newImageURL, newSetNumber, newReleaseDate, newNumberPieces, newSetTheme) {
     card.style.display = "block";
@@ -130,31 +125,38 @@ function editCardContent(card, newSet, newImageURL, newSetNumber, newReleaseDate
 
     const setTheme = card.querySelector('.setTheme');
     setTheme.innerHTML = "<b>Set Theme: </b>"+newSetTheme;
-
-    console.log("new card:", newSet, "- html: ", card);
 }
 
-
-// document.addEventListener("DOMContentLoaded", function() {
-//   showCards(1, 4);
-// });
 document.addEventListener("DOMContentLoaded", function() {
-  getSets(); // Call getSets function to fetch data
+  getSets(); 
 });
 
-function quoteAlert() {
-    console.log("Button Clicked!")
-    alert("I guess I can kiss heaven goodbye, because it got to be a sin to look this good!");
-}
-
 function prevPage() {
-  const nextPageNumber = currentPageNumber - 5;
-  if(nextPageNumber>= 0){
-    showCards(nextPageNumber, 5);
+  const prevPageNumber = currentPageNumber - 1;
+  if(prevPageNumber>=1){
+    showCards(prevPageNumber, 10);
+  }
+  else{
+    alert("START OF CATALOG")
   }
 }
 
 function nextPage() {
-  const nextPageNumber = currentPageNumber + 5;
-  showCards(nextPageNumber, 5);
+  const nextPageNumber = currentPageNumber + 1;
+  if(nextPageNumber<=21){
+    showCards(nextPageNumber, 10);
+  }
+  else{
+    alert("END OF CATALOG")
+
+  }
+}
+
+function sortSetsByDateAscending() {
+  ParsedList.sort((a, b) => a.releaseDate - b.releaseDate);
+  showCards(currentPageNumber, 10); // Call showCards to display the sorted sets
+}
+function sortSetsByDateDescending() {
+  ParsedList.sort((a, b) => b.releaseDate - a.releaseDate);
+  showCards(currentPageNumber, 10); // Call showCards to display the sorted sets
 }

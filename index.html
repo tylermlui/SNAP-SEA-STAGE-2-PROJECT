@@ -11,6 +11,21 @@
 <body>
     <header class="main-header">
         <h1 class="title"><b>LEGO SETS</b></h1>
+        <button onclick="sortSetsByDateAscending();">
+            Sort Ascending Date
+        </button>
+
+        <button onclick="sortSetsByDateDescending();">
+            Sort Descending Date
+        </button>      
+
+        <button onclick="prevPage();">
+            Previous Page
+        </button>
+
+        <button onclick="nextPage();">
+            Next Page
+        </button>
     </header>
     <div id="card-container">
         
@@ -31,10 +46,14 @@
         </div>
     </div>
     <div class="footer">
-        <button onclick="quoteAlert();">
-            Get A Quote!
+        <button onclick="sortSetsByDateAscending();">
+            Sort Ascending Date
         </button>
-        
+
+        <button onclick="sortSetsByDateDescending();">
+            Sort Descending Date
+        </button>      
+
         <button onclick="prevPage();">
             Previous Page
         </button>
